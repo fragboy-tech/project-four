@@ -1,4 +1,4 @@
-import mongoose, { Model, Document } from "mongoose";
+import mongoose, { Model, Document, ObjectId } from "mongoose";
 
 import { bookSchema } from "../schema/bookSchema";
 
@@ -58,8 +58,10 @@ class Book {
       author: string;
     }
   ) {
-    const book = await this.findByIdAndUpdate({ _id: { $eq: bookId } });
-    return book;
+    return await this.findOneAndUpdate(
+      { _id: { $eq: bookId } },
+      { $set: { title, author } }
+    );
   }
   static async removeBook(this: BookModel, { bookId }: { bookId: string }) {
     const book = await this.deleteOne({ _id: { $eq: bookId } });

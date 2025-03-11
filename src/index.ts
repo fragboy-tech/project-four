@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 import { Books } from "../db/models/book";
 import { expressMiddleware } from "@apollo/server/express4";
 import express from "express";
-import { bookSchema } from "../db/schema/bookSchema";
 
 dotenv.config();
 mongoose
@@ -18,7 +17,12 @@ mongoose
 
 const app = express();
 
-interface Player {
+interface Book {
+  title: string;
+  author: string;
+}
+
+interface Author {
   firstName: string;
   age: number;
   height: number;
@@ -27,42 +31,40 @@ interface Player {
 }
 
 const typeDefs = `
-  type Book {
-    title: String 
-    author: String
-
-    authorAndTitle: String
-  }
-
-  type Player {
+  type Author {
     firstName: String
     age: Int
     height: Float
     active: Boolean
+    authorBook: [Book]
+  }
 
-    favoriteBooks: [Book]
+  type Book {
+    title: String 
+    author: String
+    
   }
     
   type Query {
     books: [Book]
     book(title: String!): Book
 
-    players: [Player]
+    authors: [Author]
   }
 
   type Mutation {
-    bookAdd(title: String!, author: String!): String
+    bookAdd(title: String!, author: String!): Book
     bookDelete(bookId: String!) : String
+    bookUpdate(bookId: String!, title: String!, author: String!): Book
   }
 `;
 
-const players: Player[] = [
+const authors: Author[] = [
   {
-    firstName: "Bat",
+    firstName: "tp",
     age: 18,
     active: true,
     height: 6.7,
-    favoriteBooks: ["The Awaksdsening", "City of Glass"],
   },
 ];
 
@@ -79,39 +81,47 @@ const resolvers = {
     // Resolver to fetch a book by its ID
     book: async (_parent: undefined, args: { title: string }) => {
       try {
-        return await Books.find(args); // Fetch a single book by its title
+        const book = await Books.findOne(args);
+        console.log("1", book);
+        return book; // Fetch a single book by its title
       } catch (err) {
         throw new Error("Failed to fetch book");
       }
     },
 
-    // book: (_parent: undefined, args: { title: string }) => {
-    //   return Books.find((book) => book.title === args.title);
-    // },
-
-    players: () => {
-      return players;
+    authors: () => {
+      return authors;
     },
   },
 
   Mutation: {
     bookAdd: (_parent: undefined, args: { title: string; author: string }) => {
-      Books.createBook(args);
+      const book = Books.createBook(args);
 
-      return "Nom amjilttai nemlee";
+      return book;
     },
     bookDelete: (_parent: undefined, args: { bookId: string }) => {
       Books.removeBook(args);
 
       return "nom amjilttai hasagdlaa";
     },
+    bookUpdate: async (
+      _parent: undefined,
+      args: { bookId: string; title: string; author: string }
+    ) => {
+      const book = await Books.updateBook(args);
+      console.log("2", book);
+      return book;
+    },
   },
 
-  // Book: {
-  //   authorAndTitle: (parent: Book) => {
-  //     return `${parent.author} ${parent.title}`;
-  //   },
-  // },
+  Author: {
+    authorBook: async (parent: Author) => {
+      const books = await Books.find({ author: parent.firstName }).lean();
+      console.log("2", books);
+      return books;
+    },
+  },
 
   // Player: {
   //   favoriteBooks: (parent: Player) => {
