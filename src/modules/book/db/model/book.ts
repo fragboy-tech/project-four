@@ -1,34 +1,9 @@
-import mongoose, { Model, Document, ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 import { bookSchema } from "../schema/bookSchema";
 
-interface IBook extends Document {
-  title: string;
-  author: string;
-  authorAndTitle?: string;
-}
-interface BookModel extends Model<IBook> {
-  createBook({
-    title,
-    author,
-  }: {
-    title: string;
-    author: string;
-  }): Promise<IBook>;
-  getBlog({ bookId }: { bookId: string }): Promise<IBook>;
-
-  updateBook({
-    bookId,
-    title,
-    author,
-  }: {
-    bookId: string;
-    title: string;
-    author: string;
-  }): Promise<IBook>;
-
-  removeBook({ bookId }: { bookId: string }): Promise<IBook>;
-}
+import { IBook } from "../../@types";
+import { BookModel } from "../../@types";
 
 class Book {
   static async createBook(

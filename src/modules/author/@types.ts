@@ -1,6 +1,4 @@
-import mongoose from "mongoose";
-
-interface Player {
+export interface Author {
   firstName: string;
   age: number;
   height: number;
